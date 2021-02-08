@@ -4,9 +4,11 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import multer from 'multer';
 import path from 'path';
+import dotenv  from "dotenv"
 
-const app = express()
-const port = process.env.PORT || 3000
+dotenv.config();
+const app = express();
+const port = process.env.PORT || 3000;
 
 // middlewares
 app.use(express.json())
