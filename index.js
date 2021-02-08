@@ -4,9 +4,16 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import multer from 'multer';
 import path from 'path';
-import dotenv  from "dotenv"
+import dotenv  from "dotenv";
 
 dotenv.config();
+const cloudinary = require('cloudinary').v2
+cloudinary.config({ 
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET
+});
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -30,7 +37,8 @@ const storage = multer.diskStorage({
         const { originalname } = file;
         cb(null, originalname);
     }
-})
+});
+
 const upload = multer({ 
     storage,
     limits: { fileSize: maxSize },
@@ -49,14 +57,24 @@ const upload = multer({
     }
 });
 
-
 app.get('/', (req, res) => {
   res.send('Hello World!')
 });
 
-app.post('/upload', upload.array('file'), (req, res) => {
-    const path = req.files[0]['path']
-    return res.json({ status: 'OK', uploaded: req.files.length });
+app.post('/upload', upload.array('file'), async (req, res) => {
+    try {
+        const path = req.files[0]['path']
+        const response = await cloudinary.uploader.upload(path);
+        const details = {
+            asset_id: response['asset_id'],
+            format: response['format'],
+            secure_url: response['secure_url']
+        }
+        return res.json({ status: 'OK', uploaded: req.files.length, details });
+    } catch(e) {
+        console.log(e);
+        res.json({ status: 'Failure', error: e })
+    }    
 });
 
 app.listen(port, () => {
