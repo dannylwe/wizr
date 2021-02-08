@@ -58,7 +58,7 @@ const upload = multer({
 });
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('uploader')
 });
 
 app.post('/upload', upload.array('file'), async (req, res) => {
@@ -68,12 +68,13 @@ app.post('/upload', upload.array('file'), async (req, res) => {
         const details = {
             asset_id: response['asset_id'],
             format: response['format'],
-            secure_url: response['secure_url']
+            secure_url: response['secure_url'],
+            original_filename: response['original_filename']
         }
         return res.json({ status: 'OK', uploaded: req.files.length, details });
     } catch(e) {
         console.log(e);
-        res.json({ status: 'Failure', error: e })
+        res.json({ status: 'Failure', error: e }).status(500)
     }    
 });
 
