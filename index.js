@@ -7,7 +7,7 @@ import path from 'path';
 import dotenv  from "dotenv";
 
 dotenv.config();
-const cloudinary = require('cloudinary').v2
+const cloudinary = require('cloudinary', { resource_type: "auto" }).v2
 cloudinary.config({ 
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.API_KEY,

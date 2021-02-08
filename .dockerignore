@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.env_sample
+.git
+.gitignore
