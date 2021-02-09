@@ -98,9 +98,19 @@ app.post('/upload', upload.array('file'), async (req, res) => {
 //     // TODO: get url info by nanoid
 // });
 
-// app.get('/:id', (req, res) => {
-//     // TODO: redirect to short url using nanoid
-// })
+app.get('/remote/:id', async (req, res) => {
+    const { id: nanoID } = req.params;
+    try {
+        const url = await urls.findOne({ nanoID });
+        if(url) {
+            res.redirect(url['secure_url']);
+        } else {
+            res.json({status: 'Failure', error: `${nanoID}`}).status(500)
+        }
+    } catch(e) {
+        res.json({status: 'Failure', error: 'Database Error'}).status(500)
+    }
+})
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)
