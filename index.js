@@ -69,7 +69,8 @@ app.post('/upload', upload.array('file'), async (req, res) => {
             asset_id: response['asset_id'],
             format: response['format'],
             secure_url: response['secure_url'],
-            original_filename: response['original_filename']
+            original_filename: response['original_filename'],
+            mimetype: req.files[0]['mimetype']
         }
         return res.json({ status: 'OK', uploaded: req.files.length, details });
     } catch(e) {
