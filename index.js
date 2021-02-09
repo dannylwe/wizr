@@ -6,6 +6,7 @@ import multer from 'multer';
 import path from 'path';
 import dotenv  from "dotenv";
 import { nanoid } from 'nanoid';
+const fs = require('fs');
 
 dotenv.config();
 const cloudinary = require('cloudinary', { resource_type: "auto" }).v2
@@ -98,19 +99,26 @@ app.post('/upload', upload.array('file'), async (req, res) => {
 //     // TODO: get url info by nanoid
 // });
 
-app.get('/remote/:id', async (req, res) => {
+app.get('/view/:id', async (req, res) => {
     const { id: nanoID } = req.params;
     try {
         const url = await urls.findOne({ nanoID });
-        if(url) {
+        console.log(url);
+        if(url['format'] == "jpg" || url['format'] == "jpeg" || url['format'] == "png") {
             res.redirect(url['secure_url']);
-        } else {
+        } 
+        if(url['format'] == "pdf") {
+            const data = fs.readFileSync('./uploads/'+ url['original_filename'] + '.pdf');
+            res.contentType("application/pdf");
+            res.send(data);
+        }
+        else {
             res.json({status: 'Failure', error: `${nanoID}`}).status(500)
         }
     } catch(e) {
         res.json({status: 'Failure', error: 'Database Error'}).status(500)
     }
-})
+});
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)
