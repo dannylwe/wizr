@@ -7,3 +7,6 @@ docker exec -it mongo-container bash
 
 ## Access mongo from terminal
 mongo -u user -p password --authenticationDatabase admin
+
+## remove virtual env
+pipenv --rm to remove
