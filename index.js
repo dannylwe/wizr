@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import multer from 'multer';
 import path from 'path';
 import dotenv  from "dotenv";
+import { nanoid } from 'nanoid';
 
 dotenv.config();
 const cloudinary = require('cloudinary', { resource_type: "auto" }).v2
@@ -13,6 +14,14 @@ cloudinary.config({
     api_key: process.env.API_KEY,
     api_secret: process.env.API_SECRET
 });
+
+const db = require('monk')(process.env.MONGO_URI)
+db.then(()=> {
+    console.log('successfully connected to mongo');
+});
+// create collection
+var urls = db.get('urls');
+urls.createIndex('asset_id');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -65,19 +74,33 @@ app.post('/upload', upload.array('file'), async (req, res) => {
     try {
         const path = req.files[0]['path']
         const response = await cloudinary.uploader.upload(path);
+        // generate unique ID
+        const nanoID = nanoid(6).toLocaleLowerCase();
         const details = {
             asset_id: response['asset_id'],
             format: response['format'],
             secure_url: response['secure_url'],
             original_filename: response['original_filename'],
-            mimetype: req.files[0]['mimetype']
+            mimetype: req.files[0]['mimetype'],
+            nanoID
         }
-        return res.json({ status: 'OK', uploaded: req.files.length, details });
+
+        const created = await urls.insert(details);
+
+        return res.json({ status: 'OK', uploaded: req.files.length, created });
     } catch(e) {
         console.log(e);
         res.json({ status: 'Failure', error: e }).status(500)
     }    
 });
+
+// app.get('/url/:id', (req, res)=> {
+//     // TODO: get url info by nanoid
+// });
+
+// app.get('/:id', (req, res) => {
+//     // TODO: redirect to short url using nanoid
+// })
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`)
