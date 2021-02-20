@@ -6,7 +6,8 @@ import multer from 'multer';
 import path from 'path';
 import dotenv  from "dotenv";
 import { nanoid } from 'nanoid';
-const fs = require('fs');
+import fs from 'fs';
+import { exec } from "child_process";
 
 dotenv.config();
 const cloudinary = require('cloudinary', { resource_type: "auto" }).v2
@@ -117,6 +118,34 @@ app.get('/view/:id', async (req, res) => {
         }
     } catch(e) {
         res.json({status: 'Failure', error: 'Database Error'}).status(500)
+    }
+});
+
+app.get('/pdf2image/:id', async (req, res) => {
+    const { id: nanoID } = req.params;
+    try {
+        const result = await urls.findOne({ nanoID });
+        if(result['format'] == "pdf"){
+
+            const filename = './uploads/' + result.original_filename + '.pdf'
+           
+            exec("python pdf2jpg.py " + `${filename}`+ " ./uploads", (error, stdout, stderr) => {
+                if (error) {
+                    console.log(`error: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.log(`stderr: ${stderr}`);
+                    return;
+                }
+                console.log(`stdout: ${stdout}`);
+                return res.json({ status: filename });
+            });
+        } else {
+            return res.json({error: 'not a pdf'})
+        }
+    } catch(e) {
+        console.log(e)
     }
 });
 
