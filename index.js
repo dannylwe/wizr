@@ -8,6 +8,7 @@ import dotenv  from "dotenv";
 import { nanoid } from 'nanoid';
 import fs from 'fs';
 import { exec } from "child_process";
+var ppt2png = require('ppt2png');
 
 dotenv.config();
 const cloudinary = require('cloudinary', { resource_type: "auto" }).v2
@@ -68,24 +69,28 @@ const upload = multer({
     }
 });
 
-app.get('/', (req, res) => {
-  res.send('uploader')
-});
 
 app.post('/upload', upload.array('file'), async (req, res) => {
     try {
         const path = req.files[0]['path']
-
+        console.log(req.files)
         // generate unique ID
         const nanoID = nanoid(6).toLocaleLowerCase();
         if(req.files[0]['originalname'].split('.')[1] == "pptx"|"ppt") {
             const localDetails = {
                 original_filename: req.files[0]['originalname'],
                 mimetype: req.files[0]['mimetype'],
+                path: req.files[0]['path'],
+                format: "pptx",
+                presentation: localDetails.original_filename,
+                date: new Date(),
                 nanoID
             }
             const ppt = await urls.insert(localDetails);
-            return res.json({status: `local upload ${req.files[0]['originalname']}`, uploaded: ppt})
+            return res.json({
+                status: `local upload ${req.files[0]['originalname']}`,
+                uploaded: ppt
+            })
         }
         
         const response = await cloudinary.uploader.upload(path);
