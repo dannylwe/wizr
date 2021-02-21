@@ -71,7 +71,6 @@ const upload = multer({
 
 
 app.post('/upload', upload.array('file'), async (req, res) => {
-    try {
         const path = req.files[0]['path']
         console.log(req.files)
         // generate unique ID
@@ -82,10 +81,19 @@ app.post('/upload', upload.array('file'), async (req, res) => {
                 mimetype: req.files[0]['mimetype'],
                 path: req.files[0]['path'],
                 format: "pptx",
-                presentation: localDetails.original_filename,
+                // presentation: localDetails.original_filename,
                 date: new Date(),
                 nanoID
             }
+
+            // convert ppt to png
+            // const converter = Converter.create({
+            //     files:  [localDetails.original_filename],
+            //     output: 'uploads/'
+            // });
+            // const result = converter.convert();
+            // console.log(result);
+
             const ppt = await urls.insert(localDetails);
             return res.json({
                 status: `local upload ${req.files[0]['originalname']}`,
@@ -93,6 +101,7 @@ app.post('/upload', upload.array('file'), async (req, res) => {
             })
         }
         
+        try {
         const response = await cloudinary.uploader.upload(path);
         
         const details = {
