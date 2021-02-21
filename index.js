@@ -89,10 +89,18 @@ app.post('/upload', upload.array('file'), async (req, res) => {
             // convert ppt to png
             // const converter = Converter.create({
             //     files:  [localDetails.original_filename],
-            //     output: 'uploads/'
+            //     output: 'uploads/converted/'
             // });
             // const result = converter.convert();
             // console.log(result);
+
+            ppt2png(`${localDetails.original_filename}`, './uploads/converts', function( err ){
+                if(err) {
+                    console.log(err);
+                } else {
+                    console.log('convert successful.');
+                }
+            }); 
 
             const ppt = await urls.insert(localDetails);
             return res.json({
