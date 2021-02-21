@@ -8,6 +8,8 @@ import dotenv  from "dotenv";
 import { nanoid } from 'nanoid';
 import fs from 'fs';
 import { exec } from "child_process";
+import { convert } from './converters/cloudmersive'
+import { request } from './converters/onlineConverter'
 var ppt2png = require('ppt2png');
 
 dotenv.config();
@@ -86,21 +88,13 @@ app.post('/upload', upload.array('file'), async (req, res) => {
                 nanoID
             }
 
-            // convert ppt to png
-            // const converter = Converter.create({
-            //     files:  [localDetails.original_filename],
-            //     output: 'uploads/converted/'
-            // });
-            // const result = converter.convert();
-            // console.log(result);
+            // cloudmersive API
+            // convert(localDetails.path)
 
-            ppt2png(`${localDetails.original_filename}`, './uploads/converts', function( err ){
-                if(err) {
-                    console.log(err);
-                } else {
-                    console.log('convert successful.');
-                }
-            }); 
+            // online-convert API
+            const reqResponse = await request()
+            console.log(reqResponse);
+            localDetails['jobID'] = reqResponse.id
 
             const ppt = await urls.insert(localDetails);
             return res.json({
@@ -142,6 +136,9 @@ app.get('/view/:id', async (req, res) => {
             const data = fs.readFileSync('./uploads/'+ url['original_filename'] + '.pdf');
             res.contentType("application/pdf");
             res.send(data);
+        }
+        if(url['format'] == "pptx") {
+            res.json(url)
         }
         else {
             res.json({status: 'Failure', error: `${nanoID}`}).status(500)
