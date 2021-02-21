@@ -60,7 +60,7 @@ const upload = multer({
         let extname = filetypes.test(path.extname( 
             file.originalname).toLowerCase());
 
-        if (mimetype && extname) { 
+        if (extname) { 
             return cb(null, true); 
         }
 
@@ -75,9 +75,21 @@ app.get('/', (req, res) => {
 app.post('/upload', upload.array('file'), async (req, res) => {
     try {
         const path = req.files[0]['path']
-        const response = await cloudinary.uploader.upload(path);
+
         // generate unique ID
         const nanoID = nanoid(6).toLocaleLowerCase();
+        if(req.files[0]['originalname'].split('.')[1] == "pptx"|"ppt") {
+            const localDetails = {
+                original_filename: req.files[0]['originalname'],
+                mimetype: req.files[0]['mimetype'],
+                nanoID
+            }
+            const ppt = await urls.insert(localDetails);
+            return res.json({status: `local upload ${req.files[0]['originalname']}`, uploaded: ppt})
+        }
+        
+        const response = await cloudinary.uploader.upload(path);
+        
         const details = {
             asset_id: response['asset_id'],
             format: response['format'],
@@ -92,13 +104,9 @@ app.post('/upload', upload.array('file'), async (req, res) => {
         return res.json({ status: 'OK', uploaded: req.files.length, created });
     } catch(e) {
         console.log(e);
-        res.json({ status: 'Failure', error: e }).status(500)
+        return res.json({ status: 'Can not upload to cloudinary', error: e }).status(500)
     }    
 });
-
-// app.get('/url/:id', (req, res)=> {
-//     // TODO: get url info by nanoid
-// });
 
 app.get('/view/:id', async (req, res) => {
     const { id: nanoID } = req.params;
