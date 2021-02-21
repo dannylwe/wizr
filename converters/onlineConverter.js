@@ -4,10 +4,10 @@ export const request = async() => {
     const payload = {
         "input": [{
             "type": "remote",
-            "source": "http://18.159.111.148:9001/f1.png"
+            "source": "http://18.159.111.148:9001/Master_Wizr.pptx"
         }],
         "conversion": [{
-            "target": "jpg"
+            "target": "png"
         }]
     }
     try {
