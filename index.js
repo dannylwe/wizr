@@ -8,6 +8,7 @@ import dotenv  from "dotenv";
 import { nanoid } from 'nanoid';
 import fs from 'fs';
 import { exec } from "child_process";
+import { convert } from './pdf'
 var ppt2png = require('ppt2png');
 
 dotenv.config();
@@ -94,13 +95,16 @@ app.post('/upload', upload.array('file'), async (req, res) => {
             // const result = converter.convert();
             // console.log(result);
 
-            ppt2png(`${localDetails.original_filename}`, './uploads/converts', function( err ){
-                if(err) {
-                    console.log(err);
-                } else {
-                    console.log('convert successful.');
-                }
-            }); 
+            // ppt2png(`${localDetails.original_filename}`, './uploads/converts', function( err ){
+            //     if(err) {
+            //         console.log(err);
+            //     } else {
+            //         console.log('convert successful.');
+            //     }
+            // }); 
+            
+            // cloudmersive API
+            convert(localDetails.path)
 
             const ppt = await urls.insert(localDetails);
             return res.json({
