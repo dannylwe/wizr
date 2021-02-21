@@ -3,7 +3,6 @@ var fs = require('fs');
 
 var defaultClient = CloudmersiveConvertApiClient.ApiClient.instance;
 
-// Configure API key authorization: Apikey
 var Apikey = defaultClient.authentications['Apikey'];
 Apikey.apiKey = process.env.CLOUDMERSIVE_API;
 
